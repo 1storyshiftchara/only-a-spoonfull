@@ -53,10 +53,21 @@ pygame.display.set_icon(pygame.transform.scale(getimage("spoon2.png"),(32,32)))
 spc=1
 frame = 0
 def buy1():
-    if (savedata[0]>(savedata[1]+1)*10):
-        savedata[0]-=(savedata[1]+1)*10
+    if (savedata[0]>=(savedata[1]+1)*savedata[1]+10) and gridy==0:
+        savedata[0]-=(savedata[1]+1)*savedata[1]+10
         savedata[1]+=1
-        
+    return "1"
+
+def buy2():
+    if (savedata[0]>=(savedata[2]+1)*(savedata[2]*10)+100) and gridy==1:
+        savedata[0]-=(savedata[2]+1)*(savedata[2]*10)+100
+        savedata[2]+=1
+    return "2"
+def buy3():
+    if (savedata[0]>=(savedata[3]+1)*(savedata[3]*500)+1000) and gridy==2:
+        savedata[0]-=(savedata[3]+1)*(savedata[3]*500)+1000
+        savedata[3]+=1
+    return "3"
 while Running:
     (mousex,mousey)= pygame.mouse.get_pos()
     gridx = int(mousex/50)
@@ -86,19 +97,32 @@ while Running:
             pygame.draw.rect(window,white,pygame.Rect(300,50*i,300,50),1)
             i+=1
         pygame.draw.rect(window,white,pygame.Rect(300,550,300,250),1)
-        sps = (savedata[1])+(savedata[2]*10)+(savedata[3]*100)+(savedata[4]*1000)+(savedata[5]*10000)+(savedata[6]*100000)+(savedata[7]*1000000)+(savedata[8]*10000000)+(savedata[9]*100000000)+(savedata[10]*1000000000)
+        sps = (savedata[1])+(savedata[2]*10)+(savedata[3]*100)
         if (frame%60==0):
             savedata[0]+=sps
             
         if (mousedownthisframe and gridx>=1 and gridx<=4 and gridy>=5 and gridy<=8):
             savedata[0]+=spc
         elif (gridx>=5 and gridx<=11 and mousedownthisframe):
-            switch = {"0":buy1()}#,"1","2","3","4","5","6","7","8","9","10"}
-            switch[str(gridy)]
+            switch = [buy1(),buy2(),buy3()]
+            try:
+                switch[gridy]
+            except:
+                print("tba")
             #upgrade time
         window.blit(font.render('spoonfulls: {}'.format(savedata[0]), False, white),(50,150))   
         window.blit(font2.render('sps: {}'.format(sps),False,white),(100,200))
-        window.blit(font2.render('plastic benders: {}   cost: {}'.format(savedata[1],(savedata[1]+1)*10),False,white),(325,15))
+        window.blit(font2.render('plastic benders: {}   cost: {}'.format(savedata[1],
+        (savedata[1]+1)*savedata[1]+10),False,white)
+        ,(325,15))
+
+        window.blit(font2.render('plastic recyclers: {}  cost:  {}'.format(savedata[2],
+        (savedata[2]+1)*(savedata[2]*10)+100)
+        ,False,white),(325,65))
+
+        window.blit(font2.render('plastic forge:{}  cost: {}'.format(savedata[3],
+        (savedata[3]+1)*(savedata[3]*500)+1000)
+        ,False,white),(325,115))
         window.blit(images[0],(50,250))
         
         pygame.display.flip()
@@ -116,6 +140,7 @@ def writedata(data):
     saveobject.write("\n")
 for x in savedata:
     writedata(x)
+
 
 saveobject.close()
 #put code to run when game closed here probably saving stuff    
