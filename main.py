@@ -34,21 +34,26 @@ while (i<len(savedata[11])):
     
     savedata[11][i]=int(savedata[11][i])
     i+=1
-i=0
+
+
+i=len(savedata[11])-1
 curupgrade = 0
+savedata11=savedata[11].reverse()
 for x in savedata[11]:
     if (x==1):
         print(i)
         curupgrade=i+1
         break
-    i+=1
+    i-=1
+savedata11=savedata[11].reverse()
 
 
-print(savedata)
 
 window = pygame.display.set_mode((1000,800))
 
-upgrades = [upgrade(100,"doubles the size of your spoon!","comically larger spoon")]
+upgrades = [upgrade(100,"doubles the size of your spoon!","comically larger spoon"),upgrade(2500,"2x spoonfulls per second for spoonbenders","stronger benders")
+,upgrade(5000,"2x spoonfulls per second for plastic recyclers","bigger bags"),upgrade(10000,"2x spoonfulls per second for plastic forgers","hotter forges")
+,upgrade(25000,"2x spoonfulls per second for plastic factorys","child labor")]
 
 red = (255,0,0)
 blue = (0,0,255)
@@ -76,7 +81,6 @@ images[0]=pygame.transform.scale(images[0],(200,200))
 
 
 pygame.display.set_icon(pygame.transform.scale(getimage("spoon2.png"),(32,32)))
-print(savedata[11])
 spc=1*savedata[11][0]+1
 frame = 0
 
@@ -135,7 +139,7 @@ while Running:
             pygame.draw.rect(window,white,pygame.Rect(300,50*i,300,50),1)
             i+=1
         pygame.draw.rect(window,white,pygame.Rect(300,550,300,250),1)
-        sps = (savedata[1]*savedata[11][1]+1)+((savedata[2]*10)*savedata[11][2]+1)+((savedata[3]*100)*savedata[11][3]+1)+((savedata[4]*100)*savedata[11][4]+1)
+        sps = (savedata[1]*(savedata[11][1]+1))+((savedata[2]*10)*(savedata[11][2]+1))+((savedata[3]*100)*(savedata[11][3]+1))+((savedata[4]*100)*(savedata[11][4]+1))
         if (frame%60==0):
             savedata[0]+=sps
             
@@ -154,6 +158,7 @@ while Running:
                 if (curupgrade==0):
                     sps*=2
                 savedata[11][curupgrade]=1
+                savedata[0]-=cost
                 curupgrade+=1
                 
             #upgrade time
