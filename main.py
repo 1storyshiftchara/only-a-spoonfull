@@ -2,10 +2,14 @@ import pygame, re
 from time import sleep
 from pygame.image import save
 from filestuff import *
-from upgrade import upgrade
 pygame.init()
 
 
+class upgrade(object):
+    def __init__(self,cost,text,name):
+        self.cost=cost
+        self.text=text
+        self.name=name
 
 saveobject = open("data.txt","r")
 savedata = []
@@ -16,19 +20,35 @@ for line in saveobject:
 while (len(savedata)<=11):
     savedata.append(0)
 saveobject.close()
-if (len(list(str(savedata[11])))<10):
-    savedata[11]=[0,0,0,0,0,0,0,0,0,0]
-print(savedata)
-curupgrade = None
-try:
-    curupgrade=savedata[11].index(1)
-except:
-    curupgrade=0
+savedata[11]=list(str(savedata[11]))
+if (len(savedata[11])<6):
+    i = len(savedata[11])
+    while i<6:
+        i+=1
+        savedata[11]+="0"
 
+
+
+i=0
+while (i<len(savedata[11])):
+    
+    savedata[11][i]=int(savedata[11][i])
+    i+=1
+i=0
+curupgrade = 0
+for x in savedata[11]:
+    if (x==1):
+        print(i)
+        curupgrade=i+1
+        break
+    i+=1
+
+
+print(savedata)
 
 window = pygame.display.set_mode((1000,800))
 
-upgrades = [upgrade(100,'mouse','double',"doubles the size of your spoon!","comically larger spoon")]
+upgrades = [upgrade(100,"doubles the size of your spoon!","comically larger spoon")]
 
 red = (255,0,0)
 blue = (0,0,255)
@@ -56,8 +76,8 @@ images[0]=pygame.transform.scale(images[0],(200,200))
 
 
 pygame.display.set_icon(pygame.transform.scale(getimage("spoon2.png"),(32,32)))
-
-spc=1
+print(savedata[11])
+spc=1*savedata[11][0]+1
 frame = 0
 
 
@@ -85,7 +105,7 @@ def buy4():
             savedata[0]-=(savedata[4]+1)*(savedata[4]*1000)+2500
             savedata[4]+=1
 buyswitch = {"0":buy1,"1":buy2,"2":buy3,"3":buy4}
-
+millnames = ["","K","M","B","T","Quad","Quint","Sext","Sept","Oct","Non","Dec","Und","Duo","Tre"]
 while Running:
     (mousex,mousey)= pygame.mouse.get_pos()
     gridx = int(mousex/50)
@@ -115,17 +135,27 @@ while Running:
             pygame.draw.rect(window,white,pygame.Rect(300,50*i,300,50),1)
             i+=1
         pygame.draw.rect(window,white,pygame.Rect(300,550,300,250),1)
-        sps = (savedata[1])+(savedata[2]*10)+(savedata[3]*100)
+        sps = (savedata[1]*savedata[11][1]+1)+((savedata[2]*10)*savedata[11][2]+1)+((savedata[3]*100)*savedata[11][3]+1)+((savedata[4]*100)*savedata[11][4]+1)
         if (frame%60==0):
             savedata[0]+=sps
             
         if (mousedownthisframe and gridx>=1 and gridx<=4 and gridy>=5 and gridy<=8):
             savedata[0]+=spc
         elif (gridx>=5 and gridx<=11 and mousedownthisframe):
-            try:
-                buyswitch[str(gridy)]()
-            except:
-                print("tba")
+            if (gridy<11):
+                #buy time
+                try:
+                    buyswitch[str(gridy)]()
+                except:
+                    print("tba")
+            cost = upgrades[curupgrade].cost
+            if (cost<savedata[0]):
+                #can afford
+                if (curupgrade==0):
+                    sps*=2
+                savedata[11][curupgrade]=1
+                curupgrade+=1
+                
             #upgrade time
         
         
@@ -133,7 +163,6 @@ while Running:
         arrspoons = list(str(savedata[0]))
         length = len(arrspoons)-1
         if (length-3>=0):
-            millnames = ["","K","M","B","T","Quad","Quint","Sext","Sept","Oct","Non","Dec","Und","Duo","Tre"]
             i=int(length/3)
             i2=(length/3)
             if (i2-i==0):
@@ -171,13 +200,19 @@ while Running:
         window.blit(font2.render('plastic factory: {} cost {}'.format(savedata[4],
         (savedata[4]+1)*(savedata[4]*1000)+2500),
         False,white),(325,165))
-
+        #buildings
+        try:
+            window.blit(font2.render('{}'.format(upgrades[curupgrade].name),False,white),(325,575))
+            window.blit(font2.render('{}'.format(upgrades[curupgrade].text),False,white),(325,625))
+            window.blit(font2.render('cost: {}'.format(upgrades[curupgrade].cost),False,white),(325,675))
+        except:
+            pass
+        #upgrades
         window.blit(images[0],(50,250))
         pygame.display.flip()
         window.fill(black)
         pygame.display.set_caption('{} spoonfulls'.format(savedata[0]))
     sleep(0.016)
-    
     frame+=1
     #pretty sure thats like 60 fps
 #to do
