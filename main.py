@@ -35,7 +35,7 @@ while (i<len(savedata[11])):
     savedata[11][i]=int(savedata[11][i])
     i+=1
 
-
+upgradetofile=["goldspoon.png","","recycle.png","sun.png","hammer.png"]
 i=len(savedata[11])-1
 curupgrade = 0
 savedata11=savedata[11].reverse()
@@ -45,15 +45,13 @@ for x in savedata[11]:
         curupgrade=i+1
         break
     i-=1
-savedata11=savedata[11].reverse()
-
 
 
 window = pygame.display.set_mode((1000,800))
 
-upgrades = [upgrade(100,"doubles the size of your spoon!","comically larger spoon"),upgrade(2500,"2x spoonfulls per second for spoonbenders","stronger benders")
-,upgrade(5000,"2x spoonfulls per second for plastic recyclers","bigger bags"),upgrade(10000,"2x spoonfulls per second for plastic forgers","hotter forges")
-,upgrade(25000,"2x spoonfulls per second for plastic factorys","child labor")]
+upgrades = [upgrade(100,"doubles the size of your spoon!","comically larger spoon"),upgrade(2500,"2x spoonfulls for spoonbenders","stronger benders")
+,upgrade(5000,"2x spoonfulls for plastic recyclers","bigger bags"),upgrade(10000,"2x spoonfulls for plastic forgers","hotter forges")
+,upgrade(25000,"2x spoonfulls for plastic factorys","child labor")]
 
 red = (255,0,0)
 blue = (0,0,255)
@@ -77,6 +75,14 @@ font2 = pygame.font.SysFont('rondaloregular',20)
 images = []
 images.append(getimage("spoon.png"))
 images[0]=pygame.transform.scale(images[0],(200,200))
+
+savedata11=savedata[11].reverse()
+curupgradeimage = None
+
+if (upgradetofile[curupgrade]!="hammer.png"):
+    curupgradeimage=pygame.transform.scale(getimage(upgradetofile[curupgrade]),(64,64))
+else:
+    curupgradeimage=pygame.transform.scale(getimage(upgradetofile[curupgrade]),(32,64))
 
 
 
@@ -142,26 +148,38 @@ while Running:
         sps = (savedata[1]*(savedata[11][1]+1))+((savedata[2]*10)*(savedata[11][2]+1))+((savedata[3]*100)*(savedata[11][3]+1))+((savedata[4]*100)*(savedata[11][4]+1))
         if (frame%60==0):
             savedata[0]+=sps
-            
-        if (mousedownthisframe and gridx>=1 and gridx<=4 and gridy>=5 and gridy<=8):
-            savedata[0]+=spc
-        elif (gridx>=5 and gridx<=11 and mousedownthisframe):
-            if (gridy<11):
-                #buy time
-                try:
-                    buyswitch[str(gridy)]()
-                except:
-                    print("tba")
-            cost = upgrades[curupgrade].cost
-            if (cost<savedata[0]):
-                #can afford
-                if (curupgrade==0):
-                    sps*=2
-                savedata[11][curupgrade]=1
-                savedata[0]-=cost
-                curupgrade+=1
-                
-            #upgrade time
+        if (mousedownthisframe):
+            if (gridx>=1 and gridx<=4 and gridy>=5 and gridy<=8):
+                savedata[0]+=spc
+            elif (gridx>=5 and gridx<=11):
+                if (gridy<11):
+                    try:
+                        buyswitch[str(gridy)]()
+                    except:
+                        print("tba")
+                #buy stuff
+                else:
+                    cost = upgrades[curupgrade].cost
+                    if (cost<savedata[0]):
+                        #can afford
+                        if (curupgrade==0):
+                            spc*=2
+                        savedata[11][curupgrade]=1
+                        savedata[0]-=cost
+                        try:
+                            thing=getimage(upgradetofile[curupgrade+1])
+                            if (thing):
+                                if (upgradetofile[curupgrade+1]!="hammer.png"):
+                                    curupgradeimage=pygame.transform.scale(thing,(64,64))
+                                else:
+                                    curupgradeimage=pygame.transform.scale(thing,(32,64))
+                                thing=None
+                            else:
+                                curupgradeimage=False
+                        except:
+                            curupgradeimage=False
+                        curupgrade+=1
+                #upgrade stuff
         
         
         cappedspoonfulls=""
@@ -179,10 +197,7 @@ while Running:
                 cappedspoonfulls+=arrspoons[0]
                 cappedspoonfulls+=arrspoons[1]
                 cappedspoonfulls+=arrspoons[2]
-            cappedspoonfulls+=millnames[i]
-
-
-            
+            cappedspoonfulls+=millnames[i]  
         else:
             cappedspoonfulls=savedata[0]
         
@@ -207,13 +222,16 @@ while Running:
         False,white),(325,165))
         #buildings
         try:
-            window.blit(font2.render('{}'.format(upgrades[curupgrade].name),False,white),(325,575))
-            window.blit(font2.render('{}'.format(upgrades[curupgrade].text),False,white),(325,625))
-            window.blit(font2.render('cost: {}'.format(upgrades[curupgrade].cost),False,white),(325,675))
+            window.blit(font2.render('{}'.format(upgrades[curupgrade].name),False,white),(325,625))
+            window.blit(font2.render('{}'.format(upgrades[curupgrade].text),False,white),(325,675))
+            window.blit(font2.render('cost: {}'.format(upgrades[curupgrade].cost),False,white),(325,725))
+            if (curupgradeimage!=False):
+                window.blit(curupgradeimage,(301,551)) 
         except:
             pass
         #upgrades
         window.blit(images[0],(50,250))
+        
         pygame.display.flip()
         window.fill(black)
         pygame.display.set_caption('{} spoonfulls'.format(savedata[0]))
