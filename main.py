@@ -1,7 +1,8 @@
-import pygame
+import pygame, re
 from time import sleep
+from pygame.image import save
 from filestuff import *
-import filestuff
+from upgrade import upgrade
 pygame.init()
 
 
@@ -12,16 +13,22 @@ for line in saveobject:
     line = line.strip("\n")
     savedata.append(int(line))
 
-while (len(savedata)<=10):
+while (len(savedata)<=11):
     savedata.append(0)
 saveobject.close()
+if (len(list(str(savedata[11])))<10):
+    savedata[11]=[0,0,0,0,0,0,0,0,0,0]
 print(savedata)
-
+curupgrade = None
+try:
+    curupgrade=savedata[11].index(1)
+except:
+    curupgrade=0
 
 
 window = pygame.display.set_mode((1000,800))
 
-
+upgrades = [upgrade(100,'mouse','double',"doubles the size of your spoon!","comically larger spoon")]
 
 red = (255,0,0)
 blue = (0,0,255)
@@ -52,22 +59,33 @@ pygame.display.set_icon(pygame.transform.scale(getimage("spoon2.png"),(32,32)))
 
 spc=1
 frame = 0
-def buy1():
-    if (savedata[0]>=(savedata[1]+1)*savedata[1]+10) and gridy==0:
-        savedata[0]-=(savedata[1]+1)*savedata[1]+10
-        savedata[1]+=1
-    return "1"
 
+
+def buy1():
+    if (frame!=0):
+        if (savedata[0]>=(savedata[1]+1)*savedata[1]+10) and gridy==0:
+            savedata[0]-=(savedata[1]+1)*savedata[1]+10
+            savedata[1]+=1
+    return "1"
 def buy2():
-    if (savedata[0]>=(savedata[2]+1)*(savedata[2]*10)+100) and gridy==1:
-        savedata[0]-=(savedata[2]+1)*(savedata[2]*10)+100
-        savedata[2]+=1
+    if (frame!=0):
+        if (savedata[0]>=(savedata[2]+1)*(savedata[2]*10)+100) and gridy==1:
+            savedata[0]-=(savedata[2]+1)*(savedata[2]*10)+100
+            savedata[2]+=1
     return "2"
 def buy3():
-    if (savedata[0]>=(savedata[3]+1)*(savedata[3]*500)+1000) and gridy==2:
-        savedata[0]-=(savedata[3]+1)*(savedata[3]*500)+1000
-        savedata[3]+=1
+    if (frame!=0):
+        if (savedata[0]>=(savedata[3]+1)*(savedata[3]*500)+1000):
+            savedata[0]-=(savedata[3]+1)*(savedata[3]*500)+1000
+            savedata[3]+=1
     return "3"
+def buy4():
+    if (frame!=0):
+        if (savedata[0]>=(savedata[4]+1)*(savedata[4]*1000)+2500):
+            savedata[0]-=(savedata[4]+1)*(savedata[4]*1000)+2500
+            savedata[4]+=1
+buyswitch = {"0":buy1,"1":buy2,"2":buy3,"3":buy4}
+
 while Running:
     (mousex,mousey)= pygame.mouse.get_pos()
     gridx = int(mousex/50)
@@ -104,13 +122,38 @@ while Running:
         if (mousedownthisframe and gridx>=1 and gridx<=4 and gridy>=5 and gridy<=8):
             savedata[0]+=spc
         elif (gridx>=5 and gridx<=11 and mousedownthisframe):
-            switch = [buy1(),buy2(),buy3()]
             try:
-                switch[gridy]
+                buyswitch[str(gridy)]()
             except:
                 print("tba")
             #upgrade time
-        window.blit(font.render('spoonfulls: {}'.format(savedata[0]), False, white),(50,150))   
+        
+        
+        cappedspoonfulls=""
+        arrspoons = list(str(savedata[0]))
+        length = len(arrspoons)-1
+        if (length-3>=0):
+            millnames = ["","K","M","B","T","Quad","Quint","Sext","Sept","Oct","Non","Dec","Und","Duo","Tre"]
+            i=int(length/3)
+            i2=(length/3)
+            if (i2-i==0):
+                cappedspoonfulls+=arrspoons[0]
+            elif (i2-i<0.66):
+                cappedspoonfulls+=arrspoons[0]
+                cappedspoonfulls+=arrspoons[1]
+            else:
+                cappedspoonfulls+=arrspoons[0]
+                cappedspoonfulls+=arrspoons[1]
+                cappedspoonfulls+=arrspoons[2]
+            cappedspoonfulls+=millnames[i]
+
+
+            
+        else:
+            cappedspoonfulls=savedata[0]
+        
+        window.blit(font.render('spoonfulls: {}'.format(cappedspoonfulls), False, white),(50,150))   
+        
         window.blit(font2.render('sps: {}'.format(sps),False,white),(100,200))
         window.blit(font2.render('plastic benders: {}   cost: {}'.format(savedata[1],
         (savedata[1]+1)*savedata[1]+10),False,white)
@@ -123,8 +166,13 @@ while Running:
         window.blit(font2.render('plastic forge:{}  cost: {}'.format(savedata[3],
         (savedata[3]+1)*(savedata[3]*500)+1000)
         ,False,white),(325,115))
-        window.blit(images[0],(50,250))
         
+        
+        window.blit(font2.render('plastic factory: {} cost {}'.format(savedata[4],
+        (savedata[4]+1)*(savedata[4]*1000)+2500),
+        False,white),(325,165))
+
+        window.blit(images[0],(50,250))
         pygame.display.flip()
         window.fill(black)
         pygame.display.set_caption('{} spoonfulls'.format(savedata[0]))
@@ -135,13 +183,16 @@ while Running:
 #to do
     #play "only a spoon full" when spoon clicked
 saveobject = open("data.txt","w")
+savedata2=savedata.copy()
+savedata2.pop(11)
 def writedata(data):
     saveobject.write(str(data))
     saveobject.write("\n")
-for x in savedata:
+for x in savedata2:
     writedata(x)
 
-
+writedata(re.sub(" ","",' '.join(map(str,savedata[11]))))
+#converts upgrades list into one line
 saveobject.close()
 #put code to run when game closed here probably saving stuff    
 quit()
