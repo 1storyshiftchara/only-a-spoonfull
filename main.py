@@ -35,13 +35,12 @@ while (i<len(savedata[11])):
     savedata[11][i]=int(savedata[11][i])
     i+=1
 
-upgradetofile=["goldspoon.png","","recycle.png","sun.png","hammer.png"]
+upgradetofile=["goldspoon.png","spoon.png","recycle.png","sun.png","hammer.png"]
 i=len(savedata[11])-1
 curupgrade = 0
 savedata11=savedata[11].reverse()
 for x in savedata[11]:
     if (x==1):
-        print(i)
         curupgrade=i+1
         break
     i-=1
@@ -78,7 +77,6 @@ images[0]=pygame.transform.scale(images[0],(200,200))
 
 savedata11=savedata[11].reverse()
 curupgradeimage = None
-
 if (upgradetofile[curupgrade]!="hammer.png"):
     curupgradeimage=pygame.transform.scale(getimage(upgradetofile[curupgrade]),(64,64))
 else:
@@ -160,7 +158,7 @@ while Running:
                 #buy stuff
                 else:
                     cost = upgrades[curupgrade].cost
-                    if (cost<savedata[0]):
+                    if (cost<=savedata[0]):
                         #can afford
                         if (curupgrade==0):
                             spc*=2
